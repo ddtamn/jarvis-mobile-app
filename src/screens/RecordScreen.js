@@ -23,21 +23,21 @@ export default function RecordScreen({ route, navigation }) {
   const [video, setVideo] = useState();
   const [countDown, setCountDown] = useState(null);
   const [ready, setReady] = useState(true);
-  const [countDownRecord, setCountDownRecord] = useState(1);
+  const [countDownRecord, setCountDownRecord] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   // const [id, setId] = useState(undefined);
   const [publicId, setPublicId] = useState(undefined);
   // setId(route.params.id);
 
-  // supabase
-  //   .channel("record")
-  //   .on("broadcast", { event: "supa" }, (payload) => {
-  //     if (payload) {
-  //       setReady(false);
-  //       showCountdown();
-  //     }
-  //   })
-  //   .subscribe();
+  supabase
+    .channel("record")
+    .on("broadcast", { event: "supa" }, (payload) => {
+      if (payload) {
+        setReady(false);
+        showCountdown();
+      }
+    })
+    .subscribe();
 
   // if(route && route.params.id) {
   //   setId(route.params.id);
@@ -104,13 +104,13 @@ export default function RecordScreen({ route, navigation }) {
   }
 
   let showCountdownRecord = () => {
-    let count = 2;
+    let count = 6;
     const countdown = setInterval(() => {
       setCountDownRecord(count);
       count--;
       if (count < 0) {
         clearInterval(countdown);
-        setCountDownRecord(1);
+        setCountDownRecord(0);
         stopRecording();
       }
     }, 1000);
@@ -253,7 +253,7 @@ export default function RecordScreen({ route, navigation }) {
 
     setIsUploading(false);
     alert("success, your video is being proccessing");
-
+    setReady(true);
     const channel = supabase.channel("uploaded").subscribe((status) => {
       if (status === "SUBSCRIBED") {
         channel.send({
